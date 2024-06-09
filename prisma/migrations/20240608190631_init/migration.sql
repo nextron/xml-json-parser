@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Make" ADD COLUMN     "id" SERIAL NOT NULL,
+ADD CONSTRAINT "Make_pkey" PRIMARY KEY ("id");

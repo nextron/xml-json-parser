@@ -8,6 +8,7 @@ generator client {
 
 
 model Make {
+   id Int @id @default(autoincrement())
     makeId Int @unique
     makeName String
     vehicleTypes VehicleType[]
