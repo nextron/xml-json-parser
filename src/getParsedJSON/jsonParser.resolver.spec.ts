@@ -1,32 +1,81 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AppController } from '../app.controller';
-import { AppService } from '../app.service';
-import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { JsonParserService } from './jsonParser.service';
-import { JsonParserResolver } from './jsonParser.resolver';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { QueueService } from 'src/queue/queue.service';
 
 describe('JsonParser', () => {
-  let jsonParserResolver: JsonParserResolver;
+  let jsonParserService: JsonParserService;
+  let prismaService: PrismaService;
+  let queueService: QueueService;
 
   beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      imports: [
-        GraphQLModule.forRoot<ApolloDriverConfig>({
-          driver: ApolloDriver,
-          autoSchemaFile: true,
-        }),
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        JsonParserService,
+        {
+          provide: PrismaService,
+          useValue: {
+            make: {
+              count: jest.fn(),
+              findMany: jest.fn(),
+            },
+          },
+        },
+        {
+          provide: QueueService,
+          useValue: {
+            triggerDataCollection: jest.fn(),
+            getOverallJobStatus: jest.fn(),
+          },
+        },
       ],
-      controllers: [AppController],
-      providers: [AppService, JsonParserResolver, JsonParserService],
     }).compile();
 
-    jsonParserResolver = app.get<JsonParserResolver>(JsonParserResolver);
+    jsonParserService = module.get<JsonParserService>(JsonParserService);
+    prismaService = module.get<PrismaService>(PrismaService);
+    queueService = module.get<QueueService>(QueueService);
   });
 
-  describe('jsonParser', () => {
-    it('should return parsed JSON', async () => {
-      expect(await jsonParserResolver.getParsedJSON()).toBe('Hello World!');
+  describe('getJSON', () => {
+    it('should return paginated data with job status', async () => {
+      const mockData = [{ id: 1, vehicleTypes: [] }];
+      const mockPaginationInput = { skip: 0, take: 10 };
+
+      (prismaService.make.count as jest.Mock).mockResolvedValue(1);
+      (prismaService.make.findMany as jest.Mock).mockResolvedValue(mockData);
+      (queueService.getOverallJobStatus as jest.Mock).mockResolvedValue({
+        status: 'complete',
+      });
+
+      const result = await jsonParserService.getJSON(
+        mockPaginationInput,
+        false,
+      );
+
+      expect(result).toEqual({
+        jobStatus: { status: 'complete' },
+        data: mockData,
+        pagination: { pageNumber: 1, totalItems: 1 },
+      });
+
+      expect(prismaService.make.count).toHaveBeenCalled();
+      expect(prismaService.make.findMany).toHaveBeenCalledWith({
+        skip: mockPaginationInput.skip,
+        take: mockPaginationInput.take,
+        include: { vehicleTypes: true },
+      });
+    });
+
+    it('should trigger data collection if there is no data or refreshData is true', async () => {
+      (prismaService.make.count as jest.Mock).mockResolvedValue(0);
+      (prismaService.make.findMany as jest.Mock).mockResolvedValue([]);
+      (queueService.getOverallJobStatus as jest.Mock).mockResolvedValue({
+        status: 'in_progress',
+      });
+
+      await jsonParserService.getJSON({ skip: 0, take: 10 }, true);
+
+      expect(queueService.triggerDataCollection).toHaveBeenCalled();
     });
   });
 });
