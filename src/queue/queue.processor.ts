@@ -1,8 +1,10 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
 import axios from 'axios';
-import { DOMParser } from 'xmldom';
 import { PrismaService } from '../prisma/prisma.service';
+import { xmlToJSON_DOMParser } from 'src/utils/xmltoJSON_DOMParser';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Processor('json-processing')
 export class QueueProcessor {
@@ -12,50 +14,52 @@ export class QueueProcessor {
   async handleProcessing(job: Job) {
     console.log('here at handle processiing');
     const { items } = job.data;
-    const totalItems = items.length;
-
-    for (let i = 0; i < totalItems; i++) {
-      const item = items[i];
-      // Check if item exists in the DB and update or create
-      await this.prisma.make.upsert({
+    //vehicle makes upsert Operations
+    const upsertOperations = items.map((item) =>
+      this.prisma.make.upsert({
         where: { makeId: item.makeId },
         update: item,
         create: item,
-      });
+      }),
+    );
+    //executing all the operations
+    await Promise.all(upsertOperations);
 
-      // Fetch vehicle types for the make
+    const vehicleTypePromises = items.map(async (item) => {
       const makeId = item.makeId;
-      const vehicleTypeResponse = await axios.get(
-        `https://vpic.nhtsa.dot.gov/api/vehicles/GetVehicleTypesForMakeId/${makeId}?format=xml`,
-      );
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(
-        vehicleTypeResponse.data,
-        'text/xml',
-      );
-      const resultsElement = xmlDoc.getElementsByTagName('Results')[0];
-      const vehicleTypesForMakeIdsElements =
-        resultsElement.getElementsByTagName('VehicleTypesForMakeIds');
-
-      // Save vehicle types to the database
-      for (let j = 0; j < vehicleTypesForMakeIdsElements.length; j++) {
-        const vehicleType = vehicleTypesForMakeIdsElements[j];
-        await this.prisma.vehicleType.create({
-          data: {
-            typeId: parseInt(
-              vehicleType
-                .getElementsByTagName('VehicleTypeId')[0]
-                .textContent.trim(),
+      let vehicleTypeResponse;
+      // added local files as getting 403 response from the API.
+      await axios
+        .get(
+          `https://vpic.nhtsa.dot.gov/api/vehicles/GetVehicleTypesForMakeId/${makeId}?format=xml`,
+        )
+        .then((data) => (vehicleTypeResponse = data))
+        .catch(() => {
+          vehicleTypeResponse = {
+            data: fs.readFileSync(
+              path.resolve(__dirname, `../../data/${makeId}.xml`),
+              'utf8',
             ),
-            typeName: vehicleType
-              .getElementsByTagName('VehicleTypeName')[0]
-              .textContent.trim(),
-            makeId: makeId,
-          },
+          };
         });
-      }
-    }
-    console.log('here at handle processiing Completed');
+      const xml2jsonData = await xmlToJSON_DOMParser(
+        vehicleTypeResponse.data,
+        'Results',
+        'VehicleTypesForMakeIds',
+        ['VehicleTypeId', 'VehicleTypeName'],
+      );
+      let vehicleTypes = [];
+      vehicleTypes = xml2jsonData.map((vehicle: any) => ({
+        typeId: parseInt(vehicle.VehicleTypeId),
+        typeName: vehicle.VehicleTypeName,
+        makeId: makeId,
+      }));
+      return vehicleTypes;
+    });
+    const allVehicleTypes = await Promise.all(vehicleTypePromises);
+    await this.prisma.vehicleType.createMany({
+      data: allVehicleTypes.flat(),
+    });
     // The job is implicitly marked as completed when this function returns
     return;
   }

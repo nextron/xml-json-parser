@@ -1,0 +1,1 @@
+<Response xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><Count>1</Count><Message>Response returned successfully</Message><SearchCriteria>Make ID: 4877</SearchCriteria><Results><VehicleTypesForMakeIds><VehicleTypeId>1</VehicleTypeId><VehicleTypeName>Motorcycle</VehicleTypeName></VehicleTypesForMakeIds></Results></Response>
