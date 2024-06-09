@@ -13,7 +13,9 @@ export class JsonParserResolver {
   async getParsedJSON(
     @Args('paginationInput', { nullable: true })
     paginationInput: PaginationInput,
+    @Args('refreshData', { nullable: true, defaultValue: false })
+    refreshData: boolean,
   ): Promise<PaginatedResponseType> {
-    return this.jsonParserService.getJSON(paginationInput);
+    return this.jsonParserService.getJSON(paginationInput, refreshData);
   }
 }
