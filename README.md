@@ -68,7 +68,7 @@ npx prisma db push
 ### Step 6: Generate Prisma Client
 
 ```bash
-npx prisma db push
+npx prisma generate
 ```
 
 Step 7: Run the Project
