@@ -1,0 +1,65 @@
+version: '3.8'
+
+x-env: &env
+  environment:
+    NODE_ENV: ${NODE_ENV:-development}
+    PORT: ${PORT:-4000}
+    POSTGRES_USER: ${POSTGRES_USER:-user}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-user}
+    POSTGRES_PORT: 5432
+    POSTGRES_HOST: postgres
+
+services:
+  server:
+    <<: *env
+    build: .
+    command: npm run start:docker
+    tty: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src:/src
+    ports:
+      - ${PORT:-3000}:3000
+    networks:
+      - backend
+    stop_grace_period: 1s
+
+  postgres:
+    <<: *env
+    image: postgres:15-alpine3.19
+    command: ['postgres', '-c', 'log_statement=all']
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - .docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - '5433:5432'
+    networks:
+      - backend
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          "pg_isready -U -d postgres || (echo 'Database is ready'; exit 0)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    stop_grace_period: 1s
+
+  redis:
+    <<: *env
+    image: redis:alpine
+    ports:
+      - '6379:6379'
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  npm:
+  postgres:

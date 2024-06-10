@@ -8,8 +8,8 @@ import { PrismaModule } from 'src/prisma/prisma.module';
   imports: [
     BullModule.forRoot({
       redis: {
-        host: 'localhost', // Redis server host
-        port: 6379, // Redis server port
+        host: process.env.REDIS_HOST, // Redis server host
+        port: parseInt(process.env.REDIS_PORT), // Redis server port
       },
     }),
     BullModule.registerQueue({
