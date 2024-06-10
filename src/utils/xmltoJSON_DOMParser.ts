@@ -16,12 +16,20 @@ export function xmlToJSON_DOMParser(
   parentTag: string,
   childTag: string,
   elements: string[],
-): any {
+) {
   try {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xml, 'text/xml');
     const parentElement = xmlDoc.getElementsByTagName(parentTag)[0];
+    if (!parentElement) {
+      console.log(`Parent tag <${parentTag}> not found in the XML.`);
+      return [];
+    }
     const childElements = parentElement.getElementsByTagName(childTag);
+    if (!childElements) {
+      console.log(`Child tag <${childElements}> not found in the XML.`);
+      return [];
+    }
     const extractedData = [];
 
     for (let i = 0; i < childElements.length; i++) {
@@ -32,7 +40,7 @@ export function xmlToJSON_DOMParser(
 
     return extractedData;
   } catch (error) {
-    console.error('Error converting XML to JSON:', error);
+    console.log('Error converting XML to JSON:', error);
     throw new Error('Failed to convert XML to JSON');
   }
 }
