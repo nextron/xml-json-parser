@@ -18,7 +18,19 @@ export function xmlToJSON_DOMParser(
   elements: string[],
 ) {
   try {
-    const parser = new DOMParser();
+    const parser = new DOMParser({
+      errorHandler: {
+        warning: function (msg) {
+          throw new Error(msg);
+        },
+        error: function (msg) {
+          throw new Error(msg);
+        },
+        fatalError: function (msg) {
+          throw new Error(msg);
+        },
+      },
+    });
     const xmlDoc = parser.parseFromString(xml, 'text/xml');
     const parentElement = xmlDoc.getElementsByTagName(parentTag)[0];
     if (!parentElement) {
