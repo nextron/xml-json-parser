@@ -18,7 +18,7 @@ export class QueueService {
     let allMakesResponse;
     // local ip was getting 403 forbidden erorr made a local copy in case the API fails using the local copy of the XML file.
     await axios
-      .get('https://vpiasc.nhtsa.dot.gov/api/vehicles/getallmakes?format=XML')
+      .get('https://vpic.nhtsa.dot.gov/api/vehicles/getallmakes?format=XML')
       .then((data) => (allMakesResponse = data))
       .catch(() => {
         allMakesResponse = {
