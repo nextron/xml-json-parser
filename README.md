@@ -1,38 +1,77 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# XML to JSON Parser Project
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Prerequisites
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Before you begin, ensure you have the following installed:
 
-## Description
+- [Docker](https://www.docker.com/)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Setup Instructions
 
-## Installation
+### Step 1: Ensure PostgreSQL and Redis are Available
+
+You can use Docker to run PostgreSQL and Redis containers.
+
+- **PostgreSQL**:
+
+  - Pull the PostgreSQL Docker image:
+    ```bash
+    docker pull postgres
+    ```
+  - Run the PostgreSQL container:
+    ```bash
+    docker run --name postgres -e POSTGRES_PASSWORD=mysecretpassword -d -p 5432:5432 postgres
+    ```
+    Replace `mysecretpassword` with your desired password.
+
+- **Redis**:
+  - Pull the Redis Docker image:
+    ```bash
+    docker pull redis
+    ```
+  - Run the Redis container:
+    ```bash
+    docker run --name redis -d -p 6379:6379 redis
+    ```
+
+### Step 2: Clone the Repository
+
+```bash
+git clone https://github.com/nextron/xml-json-parser.git
+cd xml-json-parser
+```
+
+### Step 3: Install Dependencies
 
 ```bash
 $ npm install
 ```
 
-## Running the app
+### Step 4: Configure Environment Variables
+
+Create a .env file in the root of the project and add the necessary environment variables. Here is an example:
+
+```bash
+$DATABASE_URL="postgresql://postgres:mysecretpassword@localhost:5432/bimm?schema=public"
+$REDIS_HOST=redis
+$REDIS_PORT=6379
+```
+
+Replace mysecretpassword with your PostgreSQL password.
+
+### Step 5: Push Prisma Schema to Database
+
+```bash
+npx prisma db push
+```
+
+### Step 6: Generate Prisma Client
+
+```bash
+npx prisma db push
+```
+
+Step 7: Run the Project
 
 ```bash
 # development
@@ -40,34 +79,30 @@ $ npm run start
 
 # watch mode
 $ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
 
-## Test
+### Step 8: Running Tests
+
+To run the tests, use the following command:
 
 ```bash
 # unit tests
 $ npm run test
 
-# e2e tests
-$ npm run test:e2e
-
 # test coverage
 $ npm run test:cov
 ```
 
-## Support
+### Explanation
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+1. **Prerequisites**: Ensure Docker is installed.
+2. **Using Docker**: Instructions to pull and run PostgreSQL and Redis containers using Docker.
+3. **Clone the Repository**: Instructions to clone the repository.
+4. **Install Dependencies**: Install Node.js dependencies using `npm install`.
+5. **Configure Environment Variables**: Set up the `.env` file with PostgreSQL and Redis connection strings.
+6. **Push Prisma Schema**: Push the Prisma schema to the PostgreSQL database.
+7. **Generate Prisma Client**: Generate the Prisma client.
+8. **Run the Project**: Start the project using `npm run start`.
+9. **Running Tests**: Instructions to run tests using `npm run test`.
 
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+This should help set up the project and get it running smoothly with Docker. Let me know if you need any more details or further adjustments!
