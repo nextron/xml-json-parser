@@ -96,13 +96,13 @@ $ npm run test:cov
 ## How the Application Works
 
 GraphQL Endpoint: `http://localhost:3000/graphql`
-The primary GraphQL query for this application is getParsedJSON.
+The primary GraphQL query for this application is getJSON.
 
 ## Query
 
 ```bash
-query GetParsedJSON($paginationInput: PaginationInput, $refreshData: Boolean) {
-  getParsedJSON(paginationInput: $paginationInput, refreshData: $refreshData) {
+query getJSON($paginationInput: PaginationInput, $refreshData: Boolean) {
+  getJSON(paginationInput: $paginationInput, refreshData: $refreshData) {
     jobStatus {
       message
       percentage
@@ -146,7 +146,7 @@ query GetParsedJSON($paginationInput: PaginationInput, $refreshData: Boolean) {
 ```bash
 {
   "data": {
-    "getParsedJSON": {
+    "getJSON": {
       "jobStatus": {
         "message": "completed",
         "percentage": 100,
@@ -213,7 +213,7 @@ query GetParsedJSON($paginationInput: PaginationInput, $refreshData: Boolean) {
 
 1. Initialization:
 
-- The query getParsedJSON checks if there is any data in the database.
+- The query getJSON checks if there is any data in the database.
   If there are no rows in the database, it triggers the data collection process.
 - An explicit flag (refreshData) in the query can also trigger the data collection process.
 
@@ -238,5 +238,5 @@ query GetParsedJSON($paginationInput: PaginationInput, $refreshData: Boolean) {
 
 5. Job Status:
 
-- The status of the jobs can be found in the response of the getParsedJSON query.
+- The status of the jobs can be found in the response of the getJSON query.
 - The response includes the job status, pagination information, and the transformed data.

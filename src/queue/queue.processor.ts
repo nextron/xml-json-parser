@@ -12,7 +12,6 @@ export class QueueProcessor {
 
   @Process()
   async handleProcessing(job: Job) {
-    console.log('here at handle processiing');
     const { items } = job.data;
     //vehicle makes upsert Operations
     const upsertOperations = items.map((item) =>
