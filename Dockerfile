@@ -1,4 +1,4 @@
-FROM node:20-slim AS build
+FROM node:22-slim AS build
 RUN apt-get update -y && apt-get install -y openssl
 WORKDIR /app
 COPY --chown=node:node package*.json ./
@@ -7,7 +7,7 @@ COPY --chown=node:node . .
 RUN npm run build
 RUN npx prisma generate
 
-FROM node:20-slim
+FROM node:22-slim
 RUN apt-get update -y && apt-get install -y openssl
 WORKDIR /app
 COPY --from=build /app /app
