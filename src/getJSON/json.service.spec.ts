@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { JsonParserService } from './json.service';
+import { JsonService } from './json.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { QueueService } from 'src/queue/queue.service';
 
 describe('JsonParser', () => {
-  let jsonParserService: JsonParserService;
+  let jsonService: JsonService;
   let prismaService: PrismaService;
   let queueService: QueueService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        JsonParserService,
+        JsonService,
         {
           provide: PrismaService,
           useValue: {
@@ -31,7 +31,7 @@ describe('JsonParser', () => {
       ],
     }).compile();
 
-    jsonParserService = module.get<JsonParserService>(JsonParserService);
+    jsonService = module.get<JsonService>(JsonService);
     prismaService = module.get<PrismaService>(PrismaService);
     queueService = module.get<QueueService>(QueueService);
   });
@@ -47,10 +47,7 @@ describe('JsonParser', () => {
         status: 'complete',
       });
 
-      const result = await jsonParserService.getJSON(
-        mockPaginationInput,
-        false,
-      );
+      const result = await jsonService.getJSON(mockPaginationInput, false);
 
       expect(result).toEqual({
         jobStatus: { status: 'complete' },
@@ -73,7 +70,7 @@ describe('JsonParser', () => {
         status: 'in_progress',
       });
 
-      await jsonParserService.getJSON({ skip: 0, take: 10 }, true);
+      await jsonService.getJSON({ skip: 0, take: 10 }, true);
 
       expect(queueService.triggerDataCollection).toHaveBeenCalled();
     });
