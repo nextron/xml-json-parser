@@ -1,11 +1,11 @@
 import { Resolver, Query, Args } from '@nestjs/graphql';
-import { JsonParserService } from './json.service';
+import { JsonService } from './json.service';
 import { PaginationInput } from './types/paginationInput.type';
 import { PaginatedResponseType } from './types/paginatedResponse.type';
 
 @Resolver('JsonParser')
-export class JsonParserResolver {
-  constructor(private jsonParserService: JsonParserService) {}
+export class JsonResolver {
+  constructor(private jsonService: JsonService) {}
 
   @Query(() => PaginatedResponseType, {
     name: 'getJSON',
@@ -16,6 +16,6 @@ export class JsonParserResolver {
     @Args('refreshData', { nullable: true, defaultValue: false })
     refreshData: boolean,
   ): Promise<PaginatedResponseType> {
-    return this.jsonParserService.getJSON(paginationInput, refreshData);
+    return this.jsonService.getJSON(paginationInput, refreshData);
   }
 }

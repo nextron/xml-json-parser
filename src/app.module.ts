@@ -3,8 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { JsonParserResolver } from './getJSON/json.resolver';
-import { JsonParserService } from './getJSON/json.service';
+import { JsonResolver } from './getJSON/json.resolver';
+import { JsonService } from './getJSON/json.service';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { QueueModule } from './queue/queue.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -21,6 +21,6 @@ import { PrismaModule } from './prisma/prisma.module';
     PrismaModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JsonParserResolver, JsonParserService],
+  providers: [AppService, JsonResolver, JsonService],
 })
 export class AppModule {}

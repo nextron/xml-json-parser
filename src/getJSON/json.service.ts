@@ -5,7 +5,7 @@ import { PaginatedResponseType } from './types/paginatedResponse.type';
 import { QueueService } from 'src/queue/queue.service';
 
 @Injectable()
-export class JsonParserService {
+export class JsonService {
   constructor(
     private prisma: PrismaService,
     private queue: QueueService,
