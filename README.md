@@ -93,16 +93,150 @@ $ npm run test
 $ npm run test:cov
 ```
 
-### Explanation
+## How the Application Works
 
-1. **Prerequisites**: Ensure Docker is installed.
-2. **Using Docker**: Instructions to pull and run PostgreSQL and Redis containers using Docker.
-3. **Clone the Repository**: Instructions to clone the repository.
-4. **Install Dependencies**: Install Node.js dependencies using `npm install`.
-5. **Configure Environment Variables**: Set up the `.env` file with PostgreSQL and Redis connection strings.
-6. **Push Prisma Schema**: Push the Prisma schema to the PostgreSQL database.
-7. **Generate Prisma Client**: Generate the Prisma client.
-8. **Run the Project**: Start the project using `npm run start`.
-9. **Running Tests**: Instructions to run tests using `npm run test`.
+GraphQL Endpoint: `http://localhost:3000/graphql`
+The primary GraphQL query for this application is getParsedJSON.
 
-This should help set up the project and get it running smoothly with Docker. Let me know if you need any more details or further adjustments!
+## Query
+
+```bash
+query GetParsedJSON($paginationInput: PaginationInput, $refreshData: Boolean) {
+  getParsedJSON(paginationInput: $paginationInput, refreshData: $refreshData) {
+    jobStatus {
+      message
+      percentage
+      counts {
+        waiting
+        active
+        completed
+        failed
+      }
+    }
+    pagination {
+      totalItems
+      pageNumber
+    }
+    data {
+      makeId
+      makeName
+      vehicleTypes {
+        typeId
+        typeName
+      }
+    }
+  }
+}
+```
+
+## Example Input
+
+```bash
+{
+  "paginationInput": {
+    "skip": 1,
+    "take": 2
+  },
+  "refreshData": false
+}
+```
+
+## Example Response
+
+```bash
+{
+  "data": {
+    "getParsedJSON": {
+      "jobStatus": {
+        "message": "completed",
+        "percentage": 100,
+        "counts": {
+          "waiting": 0,
+          "active": 0,
+          "completed": 1,
+          "failed": 0
+        }
+      },
+      "pagination": {
+        "totalItems": 6,
+        "pageNumber": 1
+      },
+      "data": [
+        {
+          "makeId": 450,
+          "makeName": "FREIGHTLINER",
+          "vehicleTypes": [
+            {
+              "typeId": 3,
+              "typeName": "Truck"
+            },
+            {
+              "typeId": 5,
+              "typeName": "Bus"
+            },
+            {
+              "typeId": 7,
+              "typeName": "Multipurpose Passenger Vehicle (MPV)"
+            },
+            {
+              "typeId": 10,
+              "typeName": "Incomplete Vehicle"
+            }
+          ]
+        },
+        {
+          "makeId": 11713,
+          "makeName": "ZZKNOWN",
+          "vehicleTypes": [
+            {
+              "typeId": 1,
+              "typeName": "Motorcycle"
+            },
+            {
+              "typeId": 3,
+              "typeName": "Truck"
+            },
+            {
+              "typeId": 6,
+              "typeName": "Trailer"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+
+```
+
+### Application Logic
+
+1. Initialization:
+
+- The query getParsedJSON checks if there is any data in the database.
+  If there are no rows in the database, it triggers the data collection process.
+- An explicit flag (refreshData) in the query can also trigger the data collection process.
+
+2. Data Collection:
+
+- When data collection is triggered, the Redis queue is cleared.
+  The application fetches all vehicle makes from the API: `https://vpic.nhtsa.dot.gov/api/vehicles/getallmakes?format=XML`.
+- If the API throws an error, it fetches the XML file from a local path: `../../data/getallmakes.xml`.
+- The fetched XML data is transformed into JSON using one of two available transformers: xml2js or DOMParser.
+
+3. Batch Processing:
+
+- Once all vehicle makes are available, they are divided into batches of 25.
+- Jobs are created for each batch and added to the queue.
+
+4. Queue Processing:
+
+- The queue processor handles each job by saving the vehicle makes into the Make table in the database.
+- For each vehicle make, it fetches the vehicle types from the API: `https://vpic.nhtsa.dot.gov/api/vehicles/GetVehicleTypesForMakeId/${makeId}?format=xml`.
+- The fetched vehicle types are transformed into JSON and saved into the VehicleType table in the database.
+- This process continues until all jobs are completed.
+
+5. Job Status:
+
+- The status of the jobs can be found in the response of the getParsedJSON query.
+- The response includes the job status, pagination information, and the transformed data.
