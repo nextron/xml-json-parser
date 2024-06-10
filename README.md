@@ -8,6 +8,42 @@ Before you begin, ensure you have the following installed:
 
 ## Setup Instructions
 
+## Method 1: Using Docker Compose
+
+### Step 1: Clone the Repository
+
+```bash
+git clone https://github.com/nextron/xml-json-parser.git
+cd xml-json-parser
+```
+
+### Step 2: Create Environment Variables File
+
+Create a .env file in the root of the project and add the necessary environment variables. Here is an example:
+
+```bash
+DATABASE_URL="postgresql://user:user@postgres:5432/bimm?schema=public"
+REDIS_HOST=redis
+REDIS_PORT=6379
+```
+
+### Step 3: Run the Project with Docker Compose
+
+Ensure Docker is running on your machine. Then, start the services using Docker Compose:
+
+```bash
+docker-compose up
+```
+
+This command will:
+
+- Build and start the server.
+- Pull and start PostgreSQL and Redis containers.
+- Push the Prisma schema to the PostgreSQL database.
+- Start the NestJS application.
+
+## Method 2: Manual Setup
+
 ### Step 1: Ensure PostgreSQL and Redis are Available
 
 You can use Docker to run PostgreSQL and Redis containers.
