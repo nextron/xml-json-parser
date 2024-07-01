@@ -30,7 +30,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@prisma/client": "^5.15.0",
     "axios": "^1.7.2",
-    "bull": "^4.12.9",
+    "bull": "^4.15.0",
     "graphql": "^16.8.1",
     "ioredis": "^5.4.1",
     "reflect-metadata": "^0.2.0",
